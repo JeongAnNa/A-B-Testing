@@ -64,22 +64,6 @@ Resources:
         Ref: VPC
       InternetGatewayId:
         Ref: IGW
-  NAT1:
-    Type: AWS::EC2::NatGateway
-    Properties:
-        AllocationId: !GetAtt EIP1.AllocationId
-        SubnetId: !Ref PublicSubnet1
-        Tags:
-        - Key: Name
-          Value: ab-nat-a
-  NAT2:
-    Type: AWS::EC2::NatGateway
-    Properties:
-        AllocationId: !GetAtt EIP2.AllocationId
-        SubnetId: !Ref PublicSubnet2
-        Tags:
-        - Key: Name
-          Value: ab-nat-c
   EIP1:
     Type: AWS::EC2::EIP
     Properties:
@@ -88,6 +72,22 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
         Domain: vpc
+  NAT1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP1.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+      - Key: Name
+        Value: ab-nat-a
+  NAT2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP2.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+      - Key: Name
+        Value: ab-nat-c
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -133,7 +133,7 @@ Resources:
         RouteTableId: !Ref PrivateRouteTable2
         DestinationCidrBlock: '0.0.0.0/0'
         NatGatewayId: !Ref NAT2
-   PublicSubnetRouteTableAssociation:
+  PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -141,14 +141,14 @@ Resources:
         Ref: PublicSubnet2
       RouteTableId:
         Ref: PublicRouteTable
-   PrivateSubnetRouteTableAssociation1:
+  PrivateSubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
         Ref: PrivateSubnet1
       RouteTableId:
         Ref: PrivateRouteTable1
-   PrivateSubnetRouteTableAssociation2:
+  PrivateSubnetRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
