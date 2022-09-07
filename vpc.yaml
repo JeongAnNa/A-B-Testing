@@ -64,14 +64,6 @@ Resources:
         Ref: VPC
       InternetGatewayId:
         Ref: IGW
-  EIP1:
-    Type: AWS::EC2::EIP
-    Properties:
-        Domain: vpc
-  EIP2:
-    Type: AWS::EC2::EIP
-    Properties:
-        Domain: vpc
   NAT1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -88,6 +80,14 @@ Resources:
       Tags:
       - Key: Name
         Value: ab-nat-c
+  EIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+        Domain: vpc
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+        Domain: vpc
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -113,20 +113,20 @@ Resources:
       - Key: Name
         Value: ab-priv-rtb-c
   RouteIGW:
-    DependsOn: NATGateway
+    DependsOn: InternetGateway
     Type: AWS::EC2::Route
     Properties:
         RouteTableId: !Ref PublicRouteTable
         DestinationCidrBlock: '0.0.0.0/0'
         GatewayId: !Ref IGW
-  RouteNAT:
+  RouteNAT1:
     DependsOn: NATGateway
     Type: AWS::EC2::Route
     Properties:
         RouteTableId: !Ref PrivateRouteTable1
         DestinationCidrBlock: '0.0.0.0/0'
         NatGatewayId: !Ref NAT1
-  RouteNAT:
+  RouteNAT2:
     DependsOn: NATGateway
     Type: AWS::EC2::Route
     Properties:
