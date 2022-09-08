@@ -2,55 +2,54 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: A sample template
 
 Resources:
+  # Create VPC
   VPC:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
       Tags:
       - Key: Name
         Value: ab-vpc
+  
+  # Create Subnets
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:
-        Ref: VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
       AvailabilityZone: "ap-northeast-2a"
       Tags:
       - Key: Name
-        Value: ab-public-subnet-2a
+        Value: ab-public-subnet-a
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:
-        Ref: VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: "ap-northeast-2c"
       Tags:
       - Key: Name
-        Value: ab-public-subnet-2c
+        Value: ab-public-subnet-c
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:
-        Ref: VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.0.10.0/24
       AvailabilityZone: "ap-northeast-2a"
       Tags:
       - Key: Name
-        Value: ab-private-subnet-2a
+        Value: ab-private-subnet-a
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:
-        Ref: VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.0.11.0/24
       AvailabilityZone: "ap-northeast-2c"
       Tags:
       - Key: Name
-        Value: ab-private-subnet-2c
+        Value: ab-private-subnet-c
+
+  # Create InternetGateWay
   IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -60,98 +59,98 @@ Resources:
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId:
-        Ref: VPC
-      InternetGatewayId:
-        Ref: IGW
-  NAT1:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+  
+  # Create NatGateway
+  NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt EIP1.AllocationId
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
       SubnetId: !Ref PublicSubnet1
       Tags:
       - Key: Name
         Value: ab-nat-a
-  NAT2:
+  NatGateway2:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt EIP2.AllocationId
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
       SubnetId: !Ref PublicSubnet2
       Tags:
       - Key: Name
-        Value: ab-nat-c
-  EIP1:
-    Type: AWS::EC2::EIP
-    Properties:
-        Domain: vpc
-  EIP2:
-    Type: AWS::EC2::EIP
-    Properties:
-        Domain: vpc
+        Value: ab-nat-b
+  
+  # EIP Association
+  NatGateway1EIP:
+   Type: AWS::EC2::EIP
+   Properties:
+      Domain: vpc
+  NatGateway2EIP:
+   Type: AWS::EC2::EIP
+   Properties:
+      Domain: vpc
+
+  # Create RouteTable
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: VPC
+      VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: ab-pub-rtb
+        Value: ab-public-rtb
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: VPC
+      VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: ab-priv-rtb-a
+        Value: ab-private-rtb-a
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: VPC
+      VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: ab-priv-rtb-c
+        Value: ab-private-rtb-c
+
+# Gateway Route Attach
   RouteIGW:
-    DependsOn: InternetGateway
     Type: AWS::EC2::Route
     Properties:
         RouteTableId: !Ref PublicRouteTable
-        DestinationCidrBlock: '0.0.0.0/0'
+        DestinationCidrBlock: 0.0.0.0/0
         GatewayId: !Ref IGW
   RouteNAT1:
-    DependsOn: NATGateway
     Type: AWS::EC2::Route
     Properties:
-        RouteTableId: !Ref PrivateRouteTable1
-        DestinationCidrBlock: '0.0.0.0/0'
-        NatGatewayId: !Ref NAT1
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway1
   RouteNAT2:
-    DependsOn: NATGateway
     Type: AWS::EC2::Route
     Properties:
-        RouteTableId: !Ref PrivateRouteTable2
-        DestinationCidrBlock: '0.0.0.0/0'
-        NatGatewayId: !Ref NAT2
-  PublicSubnetRouteTableAssociation:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway2
+
+# Subnet RouteTable Association
+  PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId:
-        Ref: PublicSubnet1
-        Ref: PublicSubnet2
-      RouteTableId:
-        Ref: PublicRouteTable
-  PrivateSubnetRouteTableAssociation1:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId:
-        Ref: PrivateSubnet1
-      RouteTableId:
-        Ref: PrivateRouteTable1
-  PrivateSubnetRouteTableAssociation2:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId:
-        Ref: PrivateSubnet2
-      RouteTableId:
-        Ref: PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2
