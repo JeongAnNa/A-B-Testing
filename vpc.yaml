@@ -1,6 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: A sample template
 
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+  ImageId: 
+    Type: String 
+    Default: ami-01d87646ef267ccd7
+  Keypair: 
+    Type: AWS::EC2::KeyPair::KeyName
+
 Resources:
   # Create VPC
   VPC:
@@ -17,7 +27,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
-      AvailabilityZone: "ap-northeast-2a"
+      AvailabilityZone: ap-northeast-2a
       Tags:
       - Key: Name
         Value: ab-public-subnet-a
@@ -26,7 +36,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
-      AvailabilityZone: "ap-northeast-2c"
+      AvailabilityZone: ap-northeast-2c
       Tags:
       - Key: Name
         Value: ab-public-subnet-c
@@ -35,7 +45,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.10.0/24
-      AvailabilityZone: "ap-northeast-2a"
+      AvailabilityZone: ap-northeast-2a
       Tags:
       - Key: Name
         Value: ab-private-subnet-a
@@ -44,7 +54,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.11.0/24
-      AvailabilityZone: "ap-northeast-2c"
+      AvailabilityZone: ap-northeast-2c
       Tags:
       - Key: Name
         Value: ab-private-subnet-c
@@ -154,3 +164,36 @@ Resources:
     Properties:
       SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable2
+
+  # Create Bastion Instance
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      AvailabilityZone: ap-northeast-2a
+      KeyName: !Ref Keypair
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          SubnetId: !Ref PublicSubnet1
+          GroupSet: 
+            - !Ref BastionSG
+      Tags:
+      - Key: Name
+        Value: bastion-host
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion Host Instance sg
+      GroupName: bastion-host-sg
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: Name
+        Value: bastion-host-sg
