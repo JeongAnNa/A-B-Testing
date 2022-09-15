@@ -1,7 +1,5 @@
 # A-B-Testing
 
-=======
-
 ### 1. Architecture
 
 [Architecture]: ./Architecture/abtesting.drawio.png "A/B Testing 실습의 Architecture"
