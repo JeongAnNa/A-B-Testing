@@ -2,7 +2,7 @@
 
 ### 1. Architecture
 
-[Architecture]: ./Architecture/abtesting.drawio.png "A/B Testing 실습의 Architecture"
+[Architecture]:(./Architecture/abtesting.drawio.png)"A/B Testing 실습의 Architecture"
 
 ### 2. Velog
 
