@@ -8,7 +8,7 @@ RUN npm install
 
 ARG LOCAL_AZ
 
-ENV AZ="${AZ}"
+ENV AZ="${LOCAL_AZ}"
 RUN echo "AZ=$AZ" >> .env
 
 CMD [ "npm", "start" ]
