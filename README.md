@@ -14,4 +14,4 @@
 
 ## 3. Velog
 
-[EC2 서비스를 활용한 A/B Testing](https://github.com/JeongAnNa/A-B-Testing)
+[EC2 서비스를 활용한 A/B Testing](https://velog.io/@ribjeong04/AWS-EC2-%EC%84%9C%EB%B9%84%EC%8A%A4%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-AB-Testing)
